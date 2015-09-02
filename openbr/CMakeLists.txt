@@ -11,7 +11,14 @@ add_definitions(-DJANUS_LIBRARY)
 # Collect source files
 aux_source_directory(. SRC)
 aux_source_directory(core BR_CORE)
-aux_source_directory(detection BR_DETECTION)
+
+set(BR_WITH_DETECTION OFF CACHE BOOL "Build with Joint Cascade detection")
+if(${BR_WITH_DETECTION})
+  find_package(LibLinear REQUIRED)
+  set(BR_THIRDPARTY_SRC ${BR_THIRDPARTY_SRC} ${LibLinear_SRC})
+  aux_source_directory(detection BR_DETECTION)
+endif()
+
 include(plugins/plugins.cmake)
 
 # Optional GUI module
