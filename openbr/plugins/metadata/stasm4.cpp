@@ -79,10 +79,13 @@ class StasmTransform : public UntrainableTransform
 
     void project(const Template &src, Template &dst) const
     {
+        QRectF rcFrontal = src.file.get<QRectF>("FrontalFace");
         Mat stasmSrc(src);
-        if (src.m().channels() == 3)
-            cvtColor(src, stasmSrc, CV_BGR2GRAY);
-        else if (src.m().channels() != 1)
+        cv::Rect rcFace(rcFrontal.x(), rcFrontal.y(), rcFrontal.width(), rcFrontal.height());
+        stasmSrc = stasmSrc(rcFace);
+        if (stasmSrc.channels() == 3)
+            cvtColor(stasmSrc, stasmSrc, CV_BGR2GRAY);
+        else if (stasmSrc.channels() != 1)
             qFatal("Stasm expects single channel matrices.");
 
         if (!stasmSrc.isContinuous())
@@ -151,7 +154,7 @@ class StasmTransform : public UntrainableTransform
         } else {
             QList<QPointF> points;
             for (int i = 0; i < nLandmarks; i++) {
-                QPointF point(landmarks[2 * i], landmarks[2 * i + 1]);
+                QPointF point(rcFace.x + landmarks[2 * i], rcFace.y + landmarks[2 * i + 1]);
                 points.append(point);
             }
             dst.file.set("StasmRightEye", points[38]);
